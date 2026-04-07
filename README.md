@@ -11,5 +11,5 @@ Python un Flask tīmekļa lietotne florbola līgu rezultātu reģistrācijai,  t
 - werkzeug.security (paroļu šifrēšana)
 
 ## Plānošana
-- Wireframes: (ielīmē saiti, ja augšupielādēsi draw.io attēlu GitHub)
-- Datubāzes shēma (ERD): (ielīmē saiti)
+- Wireframes:
+- Datubāzes shēma (ERD): 
