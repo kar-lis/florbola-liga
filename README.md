@@ -7,7 +7,7 @@ Python un Flask tīmekļa lietotne florbola līgu rezultātu reģistrācijai,  t
 - Python 3
 - Flask
 - SQLite
-- Jinja2 (HTML šabloni)
+- Jinja2 
 - werkzeug.security (paroļu šifrēšana)
 
 ## Plānošana
