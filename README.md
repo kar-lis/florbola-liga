@@ -2,7 +2,7 @@
 
 ## apraksts
 Python lietotne florbola līgu rezultātu reģistrācijai,  turnīra tabulas un spēlētāju statistikas apskatei.
-- sadaļas vārtusarga statistika, spēlētāja statistika un komandas informācija tiek noņemtas nost no programmas
+- sadaļas spēlētāji, vārtusarga statistika, spēlētāja statistika un komandas informācija tiek noņemtas nost no programmas
 ## Tehnoloģijas
 - Python 3
 - Flask
