@@ -1,18 +1,29 @@
 {% extends "pamats.html" %}
 {% block content %}
-
-<div class="jumbotron">
-    <div class="row justify-content-center">
+ 
+<div class="row justify-content-center mt-4">
     <div class="col-md-8">
         <div class="card shadow-sm">
-            <div class="card-body bg-light">
-                <blockquote class="blockquote mb-0">
-                    <h2>Līgas</h2>
-                </blockquote>
+            <div class="card-body">
+                <h2 class="mb-4">Florbola līgas</h2>
+ 
+                {% if ligas %}
+                    <div class="list-group">
+                        {% for liga in ligas %}
+                            <a href="/tabula/{{ liga.id }}"
+                               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <span><strong>{{ liga.nosaukums }}</strong> &mdash; {{ liga.sezona }}</span>
+                                <span class="badge bg-primary">Skatīt &rarr;</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">Nav nevienas līgas.</p>
+                {% endif %}
+ 
             </div>
         </div>
     </div>
-    </div>
 </div>
-
+ 
 {% endblock %}

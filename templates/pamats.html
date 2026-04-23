@@ -1,40 +1,52 @@
 <!DOCTYPE html>
-<html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Florbols</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
 </head>
-
-
-<body>
-
+<body class="bg-light">
+ 
 <div class="container">
-	<header class="py-8">
-		<h1>Latvijas starptautiskā florbola federācija</h1>
-		<nav style="background-color: #007bff; padding: 15px; display: flex; justify-content: center; gap: 30px;">
-			<a href="/">Sākums</a>|
-			<a href="/login">Login</a>|
-			<a href="/rēgistreties">sign in</a>|
-			<a href="/tabula">Līgas tabula</a>|
-			<a href="/speles">Spēļu kalendārs</a>|
-			<a href="/piev_speli">Pievienot spēli</a>|
-			<a href="/lab_speli">Labot spēli</a>|
-			<a href="/dz_speli">Dzēst spēli</a>|
-			<a href="/atslegties">Log out</a>|
-		</nav>
-	</header>
-
-	<hr>
-
-	{% block content %}
-    {% endblock %}
-
-    </hr>
-    <footer class="mt-5 text-center text-muted">
+    <header class="py-3">
+        <h1 class="mb-2">Latvijas starptautiskā florbola federācija</h1>
+        <nav style="background-color: #007bff; padding: 12px 20px; border-radius: 6px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+            <a href="/">Sākums</a> |
+            <a href="/tabula">Līgas tabula</a> |
+            <a href="/speles">Spēļu kalendārs</a> |
+ 
+            {% if session.get('lietotajs') %}
+                {% if session.get('loma') == 'tiesnesis' %}
+                    | <a href="/piev_speli">Pievienot spēli</a> |
+                    <a href="/lab_speli">Labot spēli</a> |
+                    <a href="/dz_speli">Dzēst spēli</a> |
+                {% endif %}
+                | <a href="/atslegties">Iziet ({{ session['lietotajs'] }})</a>
+            {% else %}
+                | <a href="/pieteikties">Ieiet</a> |
+                <a href="/registreties">Reģistrēties</a>
+            {% endif %}
+        </nav>
+    </header>
+ 
+    <hr>
+ 
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+ 
+        {% block content %}{% endblock %}
+    </main>
+ 
+    <footer class="mt-5 py-3 text-center text-muted border-top">
         &copy; 2026 Kārlis Čače
     </footer>
 </div>
+ 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

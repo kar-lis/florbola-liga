@@ -9,14 +9,19 @@ app.secret_key = "florbols67"
 
 fails = "florbols.db"
 
+def get_db():
+    conn = sqlite3.connect(fails)
+    conn.execute("PRAGMA foreign_keys = ON")
+    conn.row_factory = sqlite3.Row
+    return conn
 
 def izveidot_db():
-    savienojums = sqlite3.connect(fails)
-    savienojums.execute("PRAGMA foreign_keys = ON")
-    kursors = savienojums.cursor()
+    conn = get_db()
+    c = conn.cursor()
+    
 
 
-    kursors.executescript("""
+    c.executescript("""
         CREATE TABLE IF NOT EXISTS ligas (
             id        INTEGER PRIMARY KEY AUTOINCREMENT,
             nosaukums TEXT NOT NULL,
@@ -53,7 +58,7 @@ def izveidot_db():
     """)
 
 
-    kursors.executemany(
+    c.executemany(
         "INSERT INTO ligas (nosaukums, sezona) VALUES (?, ?)",
         [
             ("Vieriešu Virslīga",  "2025/2026"),
@@ -63,7 +68,7 @@ def izveidot_db():
     )
 
  
-    kursors.executemany(
+    c.executemany(
         "INSERT INTO komandas (nosaukums, liga_id) VALUES (?, ?)",
         [
             ("Ulbroka/NAU",  1),
@@ -79,7 +84,7 @@ def izveidot_db():
         ]
     )
 
-    kursors.executemany(
+    c.executemany(
         """INSERT INTO speles
            (liga_id, majas_komanda_id, viesi_komanda_id, majas_varti, viesi_varti, datums)
            VALUES (?, ?, ?, ?, ?, ?)""",
@@ -97,7 +102,7 @@ def izveidot_db():
         ]
     )
 
-    kursors.executemany(
+    c.executemany(
         """INSERT INTO lietotaji (vards, lietotajvards, loma, parole_hash)
            VALUES (?, ?, ?, ?)""",
         [
@@ -110,60 +115,143 @@ def izveidot_db():
     )
 
     conn.commit()
-    savienojums.close()
-    print("Datubaze izveidota un aizpildita!")
-    print(f"  Fails: {fails}")
-
-
+    conn.close()
+try:
+    conn = get_db()
+    conn.execute("SELECT 1 FROM ligas LIMIT 1")
+    conn.close()
+except:
+    izveidot_db()
 
 @app.route("/")
-def sakums:
-	return render_template("index.html")
+def sakums():
+  conn = get_db()
+  ligas = conn.execute("SELECT * FROM ligas").fetchall()
+
+  conn.close()
+  return render_template("index.html", ligas=ligas)
+
+@app.route("/tabula/<int:liga_id>")
+def tabula(liga_id):
+    conn = get_db()
+    liga = conn.execute("SELECT * FROM ligas WHERE id = ?", (liga_id,)).fetchone()
+ 
+    if not liga:
+        conn.close()
+        flash("Šāda līga neeksistē!", "error")
+        return redirect(url_for("sakums"))
+ 
+    komandas_raw = conn.execute(
+        "SELECT * FROM komandas WHERE liga_id = ?", (liga_id,)
+    ).fetchall()
+    speles = conn.execute(
+        "SELECT * FROM speles WHERE liga_id = ?", (liga_id,)
+    ).fetchall()
+    conn.close()
+ 
+  
+    stat = {}
+    for k in komandas_raw:
+        stat[k["id"]] = {
+            "id": k["id"], "nosaukums": k["nosaukums"],
+            "speles": 0, "uzvaras": 0, "zaudejumi": 0,
+            "neizskirti": 0, "guti": 0, "ielaistie": 0, "punkti": 0
+        }
+ 
+    for s in speles:
+        m  = s["majas_komanda_id"]
+        v  = s["viesi_komanda_id"]
+        mg = s["majas_varti"]
+        vg = s["viesi_varti"]
+ 
+        if m in stat and v in stat:
+            stat[m]["speles"] += 1
+            stat[v]["speles"] += 1
+            stat[m]["guti"]      += mg
+            stat[m]["ielaistie"] += vg
+            stat[v]["guti"]      += vg
+            stat[v]["ielaistie"] += mg
+ 
+            if mg > vg:
+                stat[m]["uzvaras"]  += 1
+                stat[m]["punkti"]   += 3
+                stat[v]["zaudejumi"] += 1
+            elif vg > mg:
+                stat[v]["uzvaras"]  += 1
+                stat[v]["punkti"]   += 3
+                stat[m]["zaudejumi"] += 1
+            else:
+                stat[m]["neizskirti"] += 1
+                stat[v]["neizskirti"] += 1
+                stat[m]["punkti"] += 1
+                stat[v]["punkti"] += 1
+ 
+    komandas = sorted(stat.values(), key=lambda x: x["punkti"], reverse=True)
+    return render_template("ligas.html", liga=liga, komandas=komandas)
+
 
 @app.route("/pieteikties", methods=["GET", "POST"])
-def login():
-    if request.method == 'POST':
-        lietotajs = request.form.get('lietotajs')
-        parole = request.form.get('parole')
-
-        conn = sqlite3.connect("florbols.db")
-        conn.row_factory = sqlite3.Row
-        c = conn.cursor()
-        c.execute("SELECT * FROM lietotaji WHERE lietotajvards = ?", (lietotajs,))
-        atbilde = c.fetchone()
+def pieteikties():
+    if request.method == "POST":
+        lietotajs = request.form.get("lietotajs", "").strip()
+        parole    = request.form.get("parole", "")
+ 
+        if not lietotajs or not parole:
+            flash("Nepareizi ievadīti dati!", "error")
+            return render_template("pieteikties.html")
+ 
+        conn = get_db()
+        atbilde = conn.execute(
+            "SELECT * FROM lietotaji WHERE lietotajvards = ?", (lietotajs,)
+        ).fetchone()
         conn.close()
-
-        if atbilde and check_password_hash(atbilde['parole'], parole):
-            session["id"] = atbilde["id"]
-            session["vards"] = atbilde["vards"]
+ 
+        if atbilde and check_password_hash(atbilde["parole_hash"], parole):
+            session["id"]        = atbilde["id"]
+            session["vards"]     = atbilde["vards"]
             session["lietotajs"] = atbilde["lietotajvards"]
-            session["loma"] = 'klients'
-            return redirect("/")
+            session["loma"]      = atbilde["loma"]
+            flash(f"Laipni lūgts, {atbilde['vards']}!", "success")
+            return redirect(url_for("sakums"))
         else:
-            return "Nepareizi dati!"
-
+            flash("Nepareizi ievadīti dati!", "error")
+ 
     return render_template("pieteikties.html")
 
-def registreties():
-    if request.method == 'POST':
-    	vards = request.form.get("vards")
-        lietotajvards = request.form.get("lietotajs")
-        parole_txt = request.form.get("parole")
-        parole = generate_password_hash(parole_txt)
-        conn = sqlite3.connect("florbols.db")
-        conn.row_factory = sqlite3.Row
-        c = conn.cursor()
-        insert_sql = """
-                    INSERT INTO lietotaji (vards, lietotajvards, parole)
-                    VALUES (?, ?, ?, ?)
-                    """
-        insert_dati = (lietotajvards, vards, parole)
-        c.execute(insert_sql, insert_dati)
-        conn.commit()
-        return redirect("/pieteikties")
 
+@app.route("/registreties", methods=["GET", "POST"])
+def registreties():
+    if request.method == "POST":
+        vards         = request.form.get("vards", "").strip()
+        lietotajvards = request.form.get("lietotajs", "").strip()
+        parole_txt    = request.form.get("parole", "")
+        loma          = request.form.get("loma", "skatitajs")
+ 
+        if not vards or not lietotajvards or not parole_txt:
+            flash("Nepareizi ievadīti dati!", "error")
+            return render_template("registreties.html")
+ 
+        try:
+            conn = get_db()
+            conn.execute(
+                "INSERT INTO lietotaji (vards, lietotajvards, loma, parole_hash) VALUES (?, ?, ?, ?)",
+                (vards, lietotajvards, loma, generate_password_hash(parole_txt))
+            )
+            conn.commit()
+            conn.close()
+            flash("Profils izveidots! Vari pieteikties.", "success")
+            return redirect(url_for("pieteikties"))
+        except sqlite3.IntegrityError:
+            flash("Šāds lietotājvārds jau eksistē!", "error")
+ 
     return render_template("registreties.html")
-    
+ 
+ 
+@app.route("/atslegties")
+def atslegties():
+    session.clear()
+    flash("Veiksmīgi izrakstījies!", "success")
+    return redirect(url_for("sakums"))
 
 @app.route('/atslegties')
 def logout():
