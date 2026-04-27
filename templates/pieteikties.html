@@ -1,28 +1,108 @@
 {% extends "pamats.html" %}
 {% block content %}
  
-<div class="row justify-content-center mt-5">
-    <div class="col-md-4">
-        <div class="card shadow">
-            <div class="card-body">
-                <h2 class="text-center mb-4">Pieteikties</h2>
-                <form action="/pieteikties" method="POST">
-                    <div class="mb-3">
-                        <label for="user" class="form-label">Lietotājvārds</label>
-                        <input type="text" class="form-control" id="user" name="lietotajs"
-                               placeholder="Tavs lietotājvārds" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="pw" class="form-label">Parole</label>
-                        <input type="password" class="form-control" id="pw" name="parole"
-                               placeholder="••••••••" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Ieiet</button>
-                </form>
-                <p class="mt-3 text-center small">
-                    Vēl nav profila? <a href="/registreties">Reģistrējies šeit!</a>
-                </p>
+<style>
+.auth-wrap {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+.auth-karte {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+.auth-virsraksts {
+    text-align: center;
+    margin-bottom: 1.75rem;
+}
+.auth-virsraksts h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: .25rem;
+}
+.auth-virsraksts p {
+    font-size: 14px;
+    color: #6c757d;
+    margin: 0;
+}
+.auth-karte .form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #495057;
+}
+.auth-karte .form-control {
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    font-size: 14px;
+    padding: 9px 12px;
+}
+.auth-karte .form-control:focus {
+    border-color: #cc0000;
+    box-shadow: 0 0 0 3px rgba(204,0,0,0.1);
+}
+.btn-sarkana {
+    background: #cc0000;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    width: 100%;
+    cursor: pointer;
+    transition: background .2s;
+}
+.btn-sarkana:hover { background: #aa0000; color: white; }
+.auth-apaksa {
+    text-align: center;
+    margin-top: 1.25rem;
+    font-size: 13px;
+    color: #6c757d;
+}
+.auth-apaksa a { color: #cc0000; text-decoration: none; font-weight: 600; }
+.auth-apaksa a:hover { text-decoration: underline; }
+.ikona-aplis {
+    width: 52px; height: 52px;
+    background: #fff0f0;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 22px;
+}
+</style>
+
+<div class="auth-wrap">
+    <div class="auth-karte">
+        <div class="auth-virsraksts">
+            <div class="ikona-aplis">🏒</div>
+            <h2>Laipni lūgts!</h2>
+            <p>Piesakies savā kontā</p>
+        </div>
+ 
+        <form action="/pieteikties" method="POST">
+            <div class="mb-3">
+                <label class="form-label">Lietotājvārds</label>
+                <input type="text" class="form-control" name="lietotajs"
+                       placeholder="Tavs lietotājvārds" required>
             </div>
+            <div class="mb-4">
+                <label class="form-label">Parole</label>
+                <input type="password" class="form-control" name="parole"
+                       placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-sarkana">Ieiet</button>
+        </form>
+ 
+        <div class="auth-apaksa">
+            Vēl nav profila? <a href="/registreties">Reģistrējies šeit!</a>
         </div>
     </div>
 </div>
