@@ -71,14 +71,14 @@ def izveidot_db():
     c.executemany(
         "INSERT INTO komandas (nosaukums, liga_id) VALUES (?, ?)",
         [
-            ("Ulbroka/NAU",  1),
+            ("Ulbroka",  1),
             ("Rubene",       1),
             ("Ķekava",       1),
             ("Tasi",         1),
             ("Cesis",        1),
             ("Jelgava",      2),
             ("Mezaparks",    2),
-            ("Riga/LSPA",    2),
+            ("Riga",    2),
             ("Valmiera",     3),
             ("Adazi",        3),
         ]
@@ -116,6 +116,7 @@ def izveidot_db():
 
     conn.commit()
     conn.close()
+
 try:
     conn = get_db()
     conn.execute("SELECT 1 FROM ligas LIMIT 1")
@@ -123,13 +124,14 @@ try:
 except:
     izveidot_db()
 
+
 @app.route("/")
 def sakums():
   conn = get_db()
   ligas = conn.execute("SELECT * FROM ligas").fetchall()
-
   conn.close()
   return render_template("index.html", ligas=ligas)
+
 
 @app.route("/tabula/<int:liga_id>")
 def tabula(liga_id):
@@ -159,36 +161,50 @@ def tabula(liga_id):
         }
  
     for s in speles:
-        m  = s["majas_komanda_id"]
-        v  = s["viesi_komanda_id"]
-        mg = s["majas_varti"]
-        vg = s["viesi_varti"]
+        majas  = s["majas_komanda_id"]
+        viesi  = s["viesi_komanda_id"]
+        majas_goli = s["majas_varti"]
+        viesi_goli = s["viesi_varti"]
  
-        if m in stat and v in stat:
-            stat[m]["speles"] += 1
-            stat[v]["speles"] += 1
-            stat[m]["guti"]      += mg
-            stat[m]["ielaistie"] += vg
-            stat[v]["guti"]      += vg
-            stat[v]["ielaistie"] += mg
+        if majas in stat and viesi in stat:
+            stat[majas]["speles"] += 1
+            stat[viesi]["speles"] += 1
+            stat[majas]["guti"]      += mg
+            stat[majas]["ielaistie"] += vg
+            stat[viesi]["guti"]      += vg
+            stat[viesi]["ielaistie"] += mg
  
-            if mg > vg:
-                stat[m]["uzvaras"]  += 1
-                stat[m]["punkti"]   += 3
-                stat[v]["zaudejumi"] += 1
+            if majas_goli > viesi_goli:
+                stat[majas]["uzvaras"]  += 1
+                stat[majas]["punkti"]   += 3
+                stat[viesi]["zaudejumi"] += 1
             elif vg > mg:
-                stat[v]["uzvaras"]  += 1
-                stat[v]["punkti"]   += 3
-                stat[m]["zaudejumi"] += 1
+                stat[viesi]["uzvaras"]  += 1
+                stat[viesi]["punkti"]   += 3
+                stat[majas]["zaudejumi"] += 1
             else:
-                stat[m]["neizskirti"] += 1
-                stat[v]["neizskirti"] += 1
-                stat[m]["punkti"] += 1
-                stat[v]["punkti"] += 1
+                stat[majas]["neizskirts"] += 1
+                stat[viesi]["neizskirts"] += 1
+                stat[majas]["punkti"] += 1
+                stat[viesi]["punkti"] += 1
  
     komandas = sorted(stat.values(), key=lambda x: x["punkti"], reverse=True)
     return render_template("ligas.html", liga=liga, komandas=komandas)
 
+@app.route("/speles")
+def speles():
+    conn = get_db()
+    speles_saraksts = conn.execute("""
+        SELECT s.id, s.majas_varti, s.viesi_varti, s.datums,
+               m.nosaukums AS majas,
+               v.nosaukums AS viesi
+        FROM speles s
+        JOIN komandas m ON s.majas_komanda_id = m.id
+        JOIN komandas v ON s.viesi_komanda_id = v.id
+        ORDER BY s.datums DESC
+    """).fetchall()
+    conn.close()
+    return render_template("speles.html", speles=speles_saraksts)
 
 @app.route("/pieteikties", methods=["GET", "POST"])
 def pieteikties():
@@ -252,11 +268,6 @@ def atslegties():
     session.clear()
     flash("Veiksmīgi izrakstījies!", "success")
     return redirect(url_for("sakums"))
-
-@app.route('/atslegties')
-def logout():
-    session.clear() 
-    return redirect(url_for('sakums'))
 
 if __name__ == '__main__':
     app.run(debug=True)
