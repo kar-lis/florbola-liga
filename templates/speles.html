@@ -1,11 +1,46 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title></title>
-</head>
-<body>
-
-</body>
-</html>
+{% extends "pamats.html" %}
+{% block content %}
+ 
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Spēļu kalendārs</h4>
+    {% if session.get('loma') == 'tiesnesis' %}
+        <a href="/piev_speli" class="btn btn-sm text-white" style="background:#cc0000;">+ Pievienot spēli</a>
+    {% endif %}
+</div>
+ 
+<div class="card">
+    <div class="card-header">Spēles</div>
+    {% if speles %}
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Datums</th>
+                    <th>Mājas komanda</th>
+                    <th class="text-center">Rezultāts</th>
+                    <th>Viesi</th>
+                    {% if session.get('loma') == 'tiesnesis' %}<th></th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in speles %}
+					<tr>
+                        <td class="text-muted" style="font-size:13px;">{{ s.datums }}</td>
+                        <td>{{ s.majas }}</td>
+                        <td class="text-center fw-bold">{{ s.majas_varti }} : {{ s.viesi_varti }}</td>
+                        <td>{{ s.viesi }}</td>
+                        {% if session.get('loma') == 'tiesnesis' %}
+                            <td>
+                                <a href="/lab_speli/{{ s.id }}" class="btn btn-sm btn-warning">Labot</a>
+                                <a href="/dz_speli/{{ s.id }}"  class="btn btn-sm btn-danger ms-1">Dzēst</a>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="card-body text-muted">Vēl nav ievadīta neviena spēle.</div>
+    {% endif %}
+</div>
+ 
+{% endblock %}
