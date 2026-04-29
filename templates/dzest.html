@@ -1,11 +1,40 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title></title>
-</head>
-<body>
+{% extends "pamats.html" %}
+{% block content %}
 
-</body>
-</html>
+<div style="max-width:460px;">
+    <h4 class="mb-3">Dzēst spēli</h4>
+ 
+    <div class="card border-danger">
+        <div class="card-header bg-danger text-white">
+            Vai tiešām vēlaties dzēst šo spēli?
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered mb-4">
+                <tr>
+                    <th>Mājas komanda</th>
+                    <td>{{ spele.majas }}</td>
+                </tr>
+                <tr>
+                    <th>Viesi komanda</th>
+                    <td>{{ spele.viesi }}</td>
+                </tr>
+                <tr>
+                    <th>Rezultāts</th>
+                    <td><strong>{{ spele.majas_varti }} : {{ spele.viesi_varti }}</strong></td>
+                </tr>
+                <tr>
+                    <th>Datums</th>
+                    <td>{{ spele.datums }}</td>
+                </tr>
+            </table>
+            <div class="d-flex gap-2">
+                <form action="/dz_speli/{{ spele.id }}" method="POST" class="w-100">
+                    <button type="submit" class="btn btn-danger w-100">Dzēst</button>
+                </form>
+                <a href="/speles" class="btn btn-outline-secondary w-100">Atcelt</a>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+{% endblock %}

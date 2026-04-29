@@ -169,16 +169,16 @@ def tabula(liga_id):
         if majas in stat and viesi in stat:
             stat[majas]["speles"] += 1
             stat[viesi]["speles"] += 1
-            stat[majas]["guti"]      += mg
-            stat[majas]["ielaistie"] += vg
-            stat[viesi]["guti"]      += vg
-            stat[viesi]["ielaistie"] += mg
+            stat[majas]["guti"]      += majas_goli
+            stat[majas]["ielaistie"] += viesu_goli
+            stat[viesi]["guti"]      += viesu_goli
+            stat[viesi]["ielaistie"] += majas_goli
  
             if majas_goli > viesi_goli:
                 stat[majas]["uzvaras"]  += 1
                 stat[majas]["punkti"]   += 3
                 stat[viesi]["zaudejumi"] += 1
-            elif vg > mg:
+            elif viesi_goli > majas_goli:
                 stat[viesi]["uzvaras"]  += 1
                 stat[viesi]["punkti"]   += 3
                 stat[majas]["zaudejumi"] += 1
