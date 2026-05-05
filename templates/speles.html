@@ -9,8 +9,6 @@
 </div>
  
 <div class="container mt-4">
-    <h2 class="text-center mb-4">Spēļu kalendārs</h2>
-
     <table class="table table-hover table-striped">
         <thead class="table-dark">
             <tr>
@@ -21,21 +19,17 @@
             </tr>
         </thead>
         <tbody>
-
             {% for spele in speles %}
             <tr>
                 <td>{{ spele.datums }}</td>
-       
+
                 <td class="fw-bold text-end">{{ spele.majas_vards }}</td>
-                
                 <td class="text-center bg-light">
                     {{ spele.majas_varti }} : {{ spele.viesi_varti }}
                 </td>
-                
                 <td class="fw-bold">{{ spele.viesi_vards }}</td>
             </tr>
             {% endfor %}
-           
         </tbody>
     </table>
 

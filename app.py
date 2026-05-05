@@ -71,16 +71,14 @@ def izveidot_db():
     c.executemany(
         "INSERT INTO komandas (nosaukums, liga_id) VALUES (?, ?)",
         [
-            ("Ulbroka",  1),
-            ("Rubene",       1),
-            ("Ķekava",       1),
-            ("Tasi",         1),
-            ("Cesis",        1),
-            ("Jelgava",      2),
-            ("Mezaparks",    2),
-            ("Riga",    2),
-            ("Valmiera",     3),
-            ("Adazi",        3),
+            ("Ulbroka", 1), ("Rubene", 1), ("Ķekava", 1), 
+            ("Talsi", 1), ("Cēsis", 1), ("Lielvārde", 1), ("Valmiera", 1),
+            
+            ("Jelgava", 2), ("Mežaparks", 2), ("Rīga", 2), 
+            ("Kuldīga", 2), ("Bauska", 2), ("Saulkalne", 2),
+            
+            ("Valmiera VSS", 3), ("Ādaži", 3), ("Saldus", 3), 
+            ("NND", 3), ("Imanta", 3)
         ]
     )
 
@@ -89,16 +87,14 @@ def izveidot_db():
            (liga_id, majas_komanda_id, viesi_komanda_id, majas_varti, viesi_varti, datums)
            VALUES (?, ?, ?, ?, ?, ?)""",
         [
-            (1, 1, 2,  7,  3, "07.02.2026"),
-            (1, 3, 4,  5,  2, "07.02.2026"),
-            (1, 5, 6,  4,  4, "08.02.2026"),
-            (1, 2, 3,  6,  5, "14.02.2026"),
-            (1, 4, 5,  3,  8, "14.02.2026"),
-            (1, 1, 3,  9,  4, "21.02.2026"),
-            (1, 6, 2,  2,  7, "21.02.2026"),
-            (1, 5, 1,  3, 10, "28.02.2026"),
-            (1, 4, 6,  6,  1, "28.02.2026"),
-            (1, 3, 5,  5,  6, "07.03.2026"),
+            (1, 1, 2, 5, 4, "15.02.2026"), (1, 3, 4, 8, 2, "15.02.2026"),
+            (1, 5, 6, 3, 7, "22.02.2026"), (1, 7, 1, 4, 4, "22.02.2026"),
+            
+            (2, 8, 9, 10, 5, "16.02.2026"), (2, 10, 11, 4, 7, "16.02.2026"),
+            (2, 12, 13, 6, 3, "23.02.2026"), (2, 9, 12, 2, 5, "23.02.2026"),
+            
+            (3, 14, 15, 6, 6, "17.02.2026"), (3, 16, 17, 1, 9, "17.02.2026"),
+            (3, 18, 14, 12, 4, "24.02.2026"), (3, 15, 18, 3, 3, "24.02.2026"),
         ]
     )
 
@@ -106,11 +102,10 @@ def izveidot_db():
         """INSERT INTO lietotaji (vards, lietotajvards, loma, parole_hash)
            VALUES (?, ?, ?, ?)""",
         [
-            ("Administrators", "admin",      "tiesnesis", generate_password_hash("Admin123!")),
-            ("Tiesnesis1",     "tiesnesis1", "tiesnesis", generate_password_hash("Parole456!")),
-            ("Janis Skatitajs","janis_s",    "skatitajs", generate_password_hash("Skatitajs1!")),
-            ("Anna Liepa",     "anna_l",     "skatitajs", generate_password_hash("Anna2026!")),
-            ("Peteris Koks",   "petis_k",    "skatitajs", generate_password_hash("Petis789!")),
+            ("Administrators", "admin", "tiesnesis", generate_password_hash("Admin123!")),
+            ("Kārlis", "karlis", "skatitajs", generate_password_hash("Parole123")),
+            ("Anna Liepa", "anna_l", "skatitajs", generate_password_hash("Anna2026!")),
+            ("Peteris Koks", "petis_k", "skatitajs", generate_password_hash("Petis789!")),
         ]
     )
 
@@ -159,7 +154,7 @@ def tabula(liga_id):
         stat[k["id"]] = {
             "id": k["id"], "nosaukums": k["nosaukums"],
             "speles": 0, "uzvaras": 0, "zaudejumi": 0,
-            "neizskirti": 0, "guti": 0, "ielaistie": 0, "punkti": 0
+            "neizskirts": 0, "guti": 0, "ielaistie": 0, "punkti": 0
         }
  
     for s in speles:
@@ -190,15 +185,11 @@ def tabula(liga_id):
                 stat[majas]["punkti"] += 1
                 stat[viesi]["punkti"] += 1
  
-    komandas = sorted(stat.values(), key=lambda x: x["punkti"], reverse=True)
-    return render_template("ligas.html", liga=liga, komandas=komandas)
+    top_komandas = sorted(stat.values(), key=lambda x: x["punkti"], reverse=True)
+    return render_template("ligas.html", liga=liga, komandas=top_komandas)
 
-@app.route("/speles")
-def speles():
-    liga_id = session.get("liga_id")
-    if not liga_id:
-        flash("Lūdzu, izvēlieties līgu!")
-        return redirect(url_for("sakums"))
+@app.route("/speles/<int:liga_id>")
+def speles(liga_id):
     conn = get_db()
     speles_saraksts = conn.execute("""
         SELECT s.id, s.datums, s.majas_varti, s.viesi_varti,
@@ -234,7 +225,7 @@ def pieteikties():
             return redirect(url_for("sakums"))
         else:
             flash("Nepareizs lietotājvārds vai parole!", "error")
-            return "Nepareizi ievadīti dati!"
+            return render_template("pieteikties.html")
  
     return render_template("pieteikties.html")
 

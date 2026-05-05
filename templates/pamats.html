@@ -75,17 +75,18 @@
     <div class="galvene-virsraksts">Latvijas starptautiskā florbola federācija</div>
     <div class="nav-josla">
         <a href="/">Sākums</a>
-        <a href="/speles">Spēļu kalendārs</a>
+        {% if session.get('liga_id') %}
+        <a href="/speles/{{ session.get('liga_id') }}">Spēļu kalendārs</a>
+        <a href="/tabula/{{ session.get('liga_id') }}">Mana līga</a>
+        {% else %}
+        <a href="/speles/1">Spēļu kalendārs</a>
+        {% endif %}
  
         {% if session.get('lietotajs') %}
-            {% if session.get('liga_id') %}
-                <a href="/tabula/{{ session.get('liga_id') }}">Mana līga</a>
-            {% endif %}
-
             {% if session.get('loma') == 'tiesnesis' %}
                 <a href="/piev_speli">Pievienot spēli</a>
             {% endif %}
-            
+
             <span class="nav-lietotajs">👤 {{ session['vards'] }}</span>
             <a href="/atslegties" class="nav-btn">Iziet</a>
         {% else %}
