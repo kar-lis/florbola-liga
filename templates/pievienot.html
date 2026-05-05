@@ -9,38 +9,65 @@
 <div class="card" style="max-width:560px;">
     <div class="card-header">Jauns rezultāts</div>
     <div class="card-body">
-        <form action="/piev_speli" method="POST">
+        <form method="GET" action="/piev_speli" class="mb-4">
             <div class="mb-3">
                 <label class="form-label">Līga</label>
-                <select class="form-select" name="liga_id" required>
-                    <option value="" disabled selected>Izvēlieties līgu</option>
-                    {% for liga in ligas %}
-                        <option value="{{ liga.id }}">{{ liga.nosaukums }}</option>
+                <div class="input-group">
+                    <select class="form-select" name="liga_id" required>
+                        <option value="" disabled {% if not izveleta_liga %}selected{% endif %}>Izvēlieties līgu</option>
+                        {% for liga in ligas %}
+                            <option value="{{ liga.id }}" {% if izveleta_liga == liga.id|string %}selected{% endif %}>
+                                {{ liga.nosaukums }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-secondary">Izvēlēties</button>
+                </div>
+            </div>
+        </form>
+
+        <hr>
+        {% if komandas %}
+    <form method="POST" action="/piev_speli"></form>
+
+        <input type="hidden" name="liga_id" value="{{ izveleta_liga }}">
+        
+        <div class="row">
+            <div class="col mb-3">
+                <label class="form-label">Mājinieku komanda</label>
+                <select class="form-select" name="majas_komanda_id" required>
+                    <option value="" disabled selected>Izvēlieties mājinieku komandu</option>
+                    {% for k in komandas %}
+                        <option value="{{ k.id }}">{{ k.nosaukums }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col mb-3">
+                <label>Viesu komanda</label>
+                <select name="viesi_id" class="form-select" required>
+                    {% for k in komandas %}
+                        <option value="{{ k.id }}">{{ k.nosaukums }}</option>
                     {% endfor %}
                 </select>
             </div>
         </div>
-        <div class="row">
-            <div class="col mb-3">
-                <label class="form-label">Vārti mājiniekiem</label>
-                <input type="number" class="form-control" name="majas_varti"
-                       min="0" placeholder="piem. 5" required>
-            </div>
-            <div class="col mb-3">
-                <label class="form-label">Vārti viesiem</label>
-                <input type="number" class="form-control" name="viesi_varti"
-                        min="0" placeholder="piem. 3" required>
+            <label>Rezultāts (Mājas : Viesi)</label>
+            <div class="d-flex gap-2">
+                <input type="number" name="majas_varti" class="form-control" value="0">
+                <span class="align-self-center">:</span>
+                <input type="number" name="viesi_varti" class="form-control" value="0">
             </div>
         </div>
+
         <div class="mb-3">
             <label class="form-label">Spēles datums</label>
             <input type="date" class="form-control" name="datums" required>
         </div>
-        <button type="submit" class="btn w-100 text-white" style="background:#cc0000;">
-            Saglabāt
-        </button>
+        <button type="submit" class="btn btn-danger w-100">Saglabāt spēli</button>
     </form>
-    </div>
+    {% else %}
+        <p class="text-muted">Izvēlies līgu, lai redzētu komandas.</p>
+    {% endif %}
 </div>
- 
 {% endblock %}
+ 

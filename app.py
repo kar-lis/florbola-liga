@@ -268,7 +268,17 @@ def piev_speli():
         return redirect(url_for("sakums"))
  
     conn = get_db()
- 
+    ligas = conn.execute("SELECT * FROM ligas").fetchall()
+    izveleta_liga = request.args.get("liga_id")
+
+    komandas = []
+
+    if izveleta_liga:
+        komandas = conn.execute(
+            "SELECT id, nosaukums FROM komandas WHERE liga_id = ?", 
+            (izveleta_liga,)
+        ).fetchall()
+
     if request.method == "POST":
         liga_id  = request.form.get("liga_id", "")
         majas_id = request.form.get("majas_id", "")
@@ -277,27 +287,22 @@ def piev_speli():
         viesi_v  = request.form.get("viesi_varti", "")
         datums   = request.form.get("datums", "")
  
-        if not liga_id or not majas_id or not viesi_id or not datums:
-            flash("Nepareizi ievadīti dati!", "error")
-        elif majas_id == viesi_id:
+        if majas_id == viesi_id:
             flash("Mājas un viesi komanda nevar būt vienāda!", "error")
-        elif not majas_v.isdigit() or not viesi_v.isdigit():
-            flash("Nepareizi ievadīti dati!", "error")
-        else:
-            conn.execute("""
-                INSERT INTO speles
-                (liga_id, majas_komanda_id, viesi_komanda_id, majas_varti, viesi_varti, datums)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (liga_id, majas_id, viesi_id, int(majas_v), int(viesi_v), datums))
-            conn.commit()
-            conn.close()
-            flash("Paldies par ievadītajiem datiem, veiksmi tālākos darbos.", "success")
-            return redirect(url_for("speles"))
- 
-    ligas    = conn.execute("SELECT * FROM ligas").fetchall()
-    komandas = conn.execute("SELECT * FROM komandas").fetchall()
+            
+        conn.execute("""
+            INSERT INTO speles (liga_id, majas_komanda_id, viesi_komanda_id, majas_varti, viesi_varti, datums)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (liga_id, majas_id, viesi_id, majas_v, viesi_v, datums))
+        
+        conn.commit()
+        conn.close()
+        
+        flash("Spēle veiksmīgi pievienota!", "success")
+        return redirect(url_for("sakums"))
+    
     conn.close()
-    return render_template("pievienot.html", ligas=ligas, komandas=komandas)
+    return render_template("pievienot.html", ligas=ligas, komandas=komandas, izveleta_liga=izveleta_liga)
 
 @app.route("/dz_speli/<int:spele_id>", methods=["GET", "POST"])
 def dz_speli(spele_id):
