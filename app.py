@@ -61,7 +61,7 @@ def izveidot_db():
     c.executemany(
         "INSERT INTO ligas (nosaukums, sezona) VALUES (?, ?)",
         [
-            ("Vieriešu Virslīga",  "2025/2026"),
+            ("Vīriešu Virslīga",  "2025/2026"),
             ("Vīriešu 1. līga", "2025/2026"),
             ("Vīriešu 2. līga",   "2025/2026"),
         ]
