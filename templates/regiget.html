@@ -1,11 +1,39 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title></title>
-</head>
-<body>
-
-</body>
-</html>
+{% extends "pamats.html" %}
+{% block content %}
+ 
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Labot spēles rezultātu</h4>
+    <a href="/speles" class="btn btn-sm btn-outline-secondary">← Atpakaļ</a>
+</div>
+ 
+<div class="card" style="max-width:480px;">
+    <div class="card-header">
+        {{ spele.majas }} vs {{ spele.viesi }}
+    </div>
+    <div class="card-body">
+        <form action="/lab_speli/{{ spele.id }}" method="POST">
+            <div class="row">
+                <div class="col mb-3">
+                    <label class="form-label">{{ spele.majas }} — vārti</label>
+                    <input type="number" class="form-control" name="majas_varti"
+                           min="0" value="{{ spele.majas_varti }}" required>
+                </div>
+                <div class="col mb-3">
+                    <label class="form-label">{{ spele.viesi }} — vārti</label>
+                    <input type="number" class="form-control" name="viesi_varti"
+                           min="0" value="{{ spele.viesi_varti }}" required>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Datums</label>
+                <input type="date" class="form-control" name="datums"
+                       value="{{ spele.datums }}" required>
+            </div>
+            <button type="submit" class="btn btn-warning w-100">
+                Saglabāt izmaiņas
+            </button>
+        </form>
+    </div>
+</div>
+ 
+{% endblock %}

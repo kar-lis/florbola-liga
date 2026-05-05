@@ -245,7 +245,7 @@ def registreties():
         conn = sqlite3.connect("florbols.db")
         conn.row_factory = sqlite3.Row
         c = conn.cursor()
-         insert_sql = "INSERT INTO lietotaji (vards, lietotajvards, parole_hash) VALUES (?, ?, ?, ?)"
+        insert_sql = "INSERT INTO lietotaji (vards, lietotajvards, parole_hash) VALUES (?, ?, ?, ?)"
                     
         insert_dati = (vards, lietotajvards, parole)
         c.execute(insert_sql, insert_dati)
@@ -260,5 +260,75 @@ def atslegties():
     flash("Veiksmīgi izrakstījies!", "success")
     return redirect(url_for("sakums"))
 
+@app.route("/piev_speli", methods=["GET", "POST"])
+def piev_speli():
+    if session.get("loma") != "tiesnesis":
+        flash("Šī lapa ir pieejama tikai tiesnesim!", "error")
+        return redirect(url_for("sakums"))
+ 
+    conn = get_db()
+ 
+    if request.method == "POST":
+        liga_id  = request.form.get("liga_id", "")
+        majas_id = request.form.get("majas_id", "")
+        viesi_id = request.form.get("viesi_id", "")
+        majas_v  = request.form.get("majas_varti", "")
+        viesi_v  = request.form.get("viesi_varti", "")
+        datums   = request.form.get("datums", "")
+ 
+        if not liga_id or not majas_id or not viesi_id or not datums:
+            flash("Nepareizi ievadīti dati!", "error")
+        elif majas_id == viesi_id:
+            flash("Mājas un viesi komanda nevar būt vienāda!", "error")
+        elif not majas_v.isdigit() or not viesi_v.isdigit():
+            flash("Nepareizi ievadīti dati!", "error")
+        else:
+            conn.execute("""
+                INSERT INTO speles
+                (liga_id, majas_komanda_id, viesi_komanda_id, majas_varti, viesi_varti, datums)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (liga_id, majas_id, viesi_id, int(majas_v), int(viesi_v), datums))
+            conn.commit()
+            conn.close()
+            flash("Paldies par ievadītajiem datiem, veiksmi tālākos darbos.", "success")
+            return redirect(url_for("speles"))
+ 
+    ligas    = conn.execute("SELECT * FROM ligas").fetchall()
+    komandas = conn.execute("SELECT * FROM komandas").fetchall()
+    conn.close()
+    return render_template("pievienot.html", ligas=ligas, komandas=komandas)
+
+@app.route("/dz_speli/<int:spele_id>", methods=["GET", "POST"])
+def dz_speli(spele_id):
+    if session.get("loma") != "tiesnesis":
+        flash("Šī lapa ir pieejama tikai tiesnesim!", "error")
+        return redirect(url_for("sakums"))
+ 
+    conn = get_db()
+    spele = conn.execute("""
+        SELECT s.id, s.majas_varti, s.viesi_varti, s.datums,
+               m.nosaukums AS majas,
+               v.nosaukums AS viesi
+        FROM speles s
+        JOIN komandas m ON s.majas_komanda_id = m.id
+        JOIN komandas v ON s.viesi_komanda_id = v.id
+        WHERE s.id = ?
+    """, (spele_id,)).fetchone()
+ 
+    if not spele:
+        conn.close()
+        flash("Šāda spēle neeksistē!", "error")
+        return redirect(url_for("speles"))
+ 
+    if request.method == "POST":
+        conn.execute("DELETE FROM speles WHERE id = ?", (spele_id,))
+        conn.commit()
+        conn.close()
+        flash("Spēle veiksmīgi dzēsta.", "success")
+        return redirect(url_for("speles"))
+ 
+    conn.close()
+    return render_template("dzest.html", spele=spele)
+ 
 if __name__ == '__main__':
     app.run(debug=True)
