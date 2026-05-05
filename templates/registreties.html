@@ -90,35 +90,40 @@
         </div>
  
         <form action="/registreties" method="POST">
-            <div class="mb-3">
-                <label class="form-label">Tavs vārds</label>
-                <input type="text" class="form-control" name="vards"
-                       placeholder="Kā tevi saukt?" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Lietotājvārds</label>
-                <input type="text" class="form-control" name="lietotajs"
-                       placeholder="Unikāls lietotājvārds" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Kas esi?</label>
-                <select class="form-select" name="loma">
-                    <option value="skatitajs">Skatītājs</option>
-                    <option value="speletajs">Spēlētājs</option>
-                </select>
-            </div>
-            <div class="mb-4">
-                <label class="form-label">Parole</label>
-                <input type="password" class="form-control" name="parole"
-                       placeholder="Izvēlies drošu paroli" required>
-            </div>
-            <button type="submit" class="btn-sarkana">Izveidot profilu</button>
-        </form>
- 
-        <div class="auth-apaksa">
-            Jau ir konts? <a href="/pieteikties">Ieiet šeit!</a>
-        </div>
+    <div class="mb-3">
+        <label class="form-label">Tavs vārds</label>
+        <input type="text" class="form-control" name="vards"
+               placeholder="Kā tevi saukt?" required>
     </div>
+
+    <div class="mb-3">
+        <label class="form-label">Lietotājvārds</label>
+        <input type="text" class="form-control" name="lietotajs"
+               placeholder="Unikāls lietotājvārds" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Kādai līgai vēlies sekot?</label>
+        <select class="form-select" name="liga_id" required>
+            <option value="" disabled selected>Izvēlies līgu...</option>
+            {% for liga in ligas %}
+                <option value="{{ liga.id }}">{{ liga.nosaukums }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="mb-4">
+        <label class="form-label">Parole</label>
+        <input type="password" class="form-control" name="parole"
+               placeholder="Izvēlies drošu paroli" required>
+    </div>
+
+    <button type="submit" class="btn-sarkana">Izveidot profilu</button>
+</form>
+
+<div class="auth-apaksa">Jau ir profils? <a href="/pieteikties">Pieslēdzies šeit</a>
 </div>
+</div>
+
  
 {% endblock %}

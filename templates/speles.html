@@ -8,39 +8,42 @@
     {% endif %}
 </div>
  
-<div class="card">
-    <div class="card-header">Spēles</div>
-    {% if speles %}
-        <table class="table table-hover mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th>Datums</th>
-                    <th>Mājas komanda</th>
-                    <th class="text-center">Rezultāts</th>
-                    <th>Viesi</th>
-                    {% if session.get('loma') == 'tiesnesis' %}<th></th>{% endif %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for s in speles %}
-					<tr>
-                        <td class="text-muted" style="font-size:13px;">{{ s.datums }}</td>
-                        <td>{{ s.majas }}</td>
-                        <td class="text-center fw-bold">{{ s.majas_varti }} : {{ s.viesi_varti }}</td>
-                        <td>{{ s.viesi }}</td>
-                        {% if session.get('loma') == 'tiesnesis' %}
-                            <td>
-                                <a href="/lab_speli/{{ s.id }}" class="btn btn-sm btn-warning">Labot</a>
-                                <a href="/dz_speli/{{ s.id }}"  class="btn btn-sm btn-danger ms-1">Dzēst</a>
-                            </td>
-                        {% endif %}
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <div class="card-body text-muted">Vēl nav ievadīta neviena spēle.</div>
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Spēļu kalendārs</h2>
+
+    <table class="table table-hover table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Datums</th>
+                <th>Mājinieki</th>
+                <th class="text-center">Rezultāts</th>
+                <th>Viesi</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            {% for spele in speles %}
+            <tr>
+                <td>{{ spele.datums }}</td>
+       
+                <td class="fw-bold text-end">{{ spele.majas_vards }}</td>
+                
+                <td class="text-center bg-light">
+                    {{ spele.majas_varti }} : {{ spele.viesi_varti }}
+                </td>
+                
+                <td class="fw-bold">{{ spele.viesi_vards }}</td>
+            </tr>
+            {% endfor %}
+           
+        </tbody>
+    </table>
+
+    {% if not speles %}
+        <div class="alert alert-info text-center">
+            Šajā līgā spēles vēl nav ieplānotas.
+        </div>
     {% endif %}
 </div>
- 
+
 {% endblock %}

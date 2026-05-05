@@ -19,3 +19,28 @@
                     {% endfor %}
                 </select>
             </div>
+        </div>
+        <div class="row">
+            <div class="col mb-3">
+                <label class="form-label">Vārti mājiniekiem</label>
+                <input type="number" class="form-control" name="majas_varti"
+                       min="0" placeholder="piem. 5" required>
+            </div>
+            <div class="col mb-3">
+                <label class="form-label">Vārti viesiem</label>
+                <input type="number" class="form-control" name="viesi_varti"
+                        min="0" placeholder="piem. 3" required>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Spēles datums</label>
+            <input type="date" class="form-control" name="datums" required>
+        </div>
+        <button type="submit" class="btn w-100 text-white" style="background:#cc0000;">
+            Saglabāt
+        </button>
+    </form>
+    </div>
+</div>
+ 
+{% endblock %}
