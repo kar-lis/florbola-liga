@@ -199,8 +199,8 @@ def speles():
                m.nosaukums AS majas,
                v.nosaukums AS viesi
         FROM speles s
-        JOIN komandas m ON s.majas_komanda_id = m.id
-        JOIN komandas v ON s.viesi_komanda_id = v.id
+        JOIN komandas majas ON s.majas_komanda_id = m.id
+        JOIN komandas viesi ON s.viesi_komanda_id = v.id
         ORDER BY s.datums DESC
     """).fetchall()
     conn.close()
@@ -212,12 +212,12 @@ def pieteikties():
         lietotajs = request.form.get("lietotajs", "").strip()
         parole    = request.form.get("parole", "")
  
-        if not lietotajs or not parole:
-            flash("Nepareizi ievadīti dati!", "error")
-            return render_template("pieteikties.html")
+        
  
-        conn = get_db()
-        atbilde = conn.execute(
+        conn = sqlite3.connect("pica.db")
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        c = conn.execute(
             "SELECT * FROM lietotaji WHERE lietotajvards = ?", (lietotajs,)
         ).fetchone()
         conn.close()
@@ -230,7 +230,7 @@ def pieteikties():
             flash(f"Laipni lūgts, {atbilde['vards']}!", "success")
             return redirect(url_for("sakums"))
         else:
-            flash("Nepareizi ievadīti dati!", "error")
+            return "Nepareizi ievadīti dati!"
  
     return render_template("pieteikties.html")
 
@@ -238,30 +238,21 @@ def pieteikties():
 @app.route("/registreties", methods=["GET", "POST"])
 def registreties():
     if request.method == "POST":
-        vards         = request.form.get("vards", "").strip()
-        lietotajvards = request.form.get("lietotajs", "").strip()
+        vards         = request.form.get("vards", "")
+        lietotajvards = request.form.get("lietotajs", "")
         parole_txt    = request.form.get("parole", "")
         loma          = request.form.get("loma", "skatitajs")
- 
-        if not vards or not lietotajvards or not parole_txt:
-            flash("Nepareizi ievadīti dati!", "error")
-            return render_template("registreties.html")
- 
-        try:
-            conn = get_db()
-            conn.execute(
-                "INSERT INTO lietotaji (vards, lietotajvards, loma, parole_hash) VALUES (?, ?, ?, ?)",
-                (vards, lietotajvards, loma, generate_password_hash(parole_txt))
-            )
-            conn.commit()
-            conn.close()
-            flash("Profils izveidots! Vari pieteikties.", "success")
-            return redirect(url_for("pieteikties"))
-        except sqlite3.IntegrityError:
-            flash("Šāds lietotājvārds jau eksistē!", "error")
+        conn = sqlite3.connect("florbols.db")
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+         insert_sql = "INSERT INTO lietotaji (vards, lietotajvards, parole_hash) VALUES (?, ?, ?, ?)"
+                    
+        insert_dati = (vards, lietotajvards, parole)
+        c.execute(insert_sql, insert_dati)
+        conn.commit()
+        return redirect(url_for("pieteikties"))
  
     return render_template("registreties.html")
- 
  
 @app.route("/atslegties")
 def atslegties():
