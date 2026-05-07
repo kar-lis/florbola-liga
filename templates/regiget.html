@@ -1,39 +1,39 @@
 {% extends "pamats.html" %}
 {% block content %}
- 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Labot spēles rezultātu</h4>
-    <a href="/speles" class="btn btn-sm btn-outline-secondary">← Atpakaļ</a>
-</div>
- 
-<div class="card" style="max-width:480px;">
-    <div class="card-header">
-        {{ spele.majas }} vs {{ spele.viesi }}
-    </div>
-    <div class="card-body">
-        <form action="/lab_speli/{{ spele.id }}" method="POST">
-            <div class="row">
-                <div class="col mb-3">
-                    <label class="form-label">{{ spele.majas }} — vārti</label>
-                    <input type="number" class="form-control" name="majas_varti"
-                           min="0" value="{{ spele.majas_varti }}" required>
+<div class="container mt-4">
+    <div class="card mx-auto" style="max-width: 500px;">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">Rediģēt spēles rezultātu</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-center">
+                <strong>{{ spele.majas }} vs {{ spele.viesi }}</strong>
+            </p>
+            
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Rezultāts (Mājas : Viesi)</label>
+                    <div class="d-flex gap-2">
+                        <input type="number" name="majas_varti" class="form-control" 
+                               value="{{ spele.majas_varti }}" min="0" required>
+                        <span class="align-self-center">:</span>
+                        <input type="number" name="viesi_varti" class="form-control" 
+                               value="{{ spele.viesi_varti }}" min="0" required>
+                    </div>
                 </div>
-                <div class="col mb-3">
-                    <label class="form-label">{{ spele.viesi }} — vārti</label>
-                    <input type="number" class="form-control" name="viesi_varti"
-                           min="0" value="{{ spele.viesi_varti }}" required>
+
+                <div class="mb-3">
+                    <label class="form-label">Spēles datums</label>
+                    <input type="text" name="datums" class="form-control" 
+                           value="{{ spele.datums }}" required>
                 </div>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Datums</label>
-                <input type="date" class="form-control" name="datums"
-                       value="{{ spele.datums }}" required>
-            </div>
-            <button type="submit" class="btn btn-warning w-100">
-                Saglabāt izmaiņas
-            </button>
-        </form>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">Saglabāt izmaiņas</button>
+                    <a href="{{ url_for('sakums') }}" class="btn btn-outline-secondary">Atcelt</a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
- 
 {% endblock %}

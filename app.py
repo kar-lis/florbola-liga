@@ -270,7 +270,6 @@ def piev_speli():
     conn = get_db()
     ligas = conn.execute("SELECT * FROM ligas").fetchall()
     izveleta_liga = request.args.get("liga_id")
-
     komandas = []
 
     if izveleta_liga:
@@ -294,14 +293,13 @@ def piev_speli():
             INSERT INTO speles (liga_id, majas_komanda_id, viesi_komanda_id, majas_varti, viesi_varti, datums)
             VALUES (?, ?, ?, ?, ?, ?)
         """, (liga_id, majas_id, viesi_id, majas_v, viesi_v, datums))
-        
         conn.commit()
         conn.close()
-        
         flash("Spēle veiksmīgi pievienota!", "success")
         return redirect(url_for("sakums"))
     
-    conn.close()
+    if conn:
+        conn.close()
     return render_template("pievienot.html", ligas=ligas, komandas=komandas, izveleta_liga=izveleta_liga)
 
 @app.route("/dz_speli/<int:spele_id>", methods=["GET", "POST"])
@@ -377,7 +375,7 @@ def lab_speli(spele_id):
         flash("Šāda spēle neeksistē!", "error")
         return redirect(url_for("speles"))
  
-    return render_template("labot.html", spele=spele)
+    return render_template("regiget.html", spele=spele)
  
 if __name__ == '__main__':
     app.run(debug=True)

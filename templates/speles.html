@@ -16,18 +16,28 @@
                 <th>Mājinieki</th>
                 <th class="text-center">Rezultāts</th>
                 <th>Viesi</th>
+                {% if session.get('loma') == 'tiesnesis' %}
+                <th>Darbības</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
             {% for spele in speles %}
             <tr>
                 <td>{{ spele.datums }}</td>
+                <td>{{ spele.majas_vards }}</td>
+                <td><strong>{{ spele.majas_varti }} : {{ spele.viesi_varti }}</strong></td>
+                <td>{{ spele.viesi_vards }}</td>
 
-                <td class="fw-bold text-end">{{ spele.majas_vards }}</td>
-                <td class="text-center bg-light">
-                    {{ spele.majas_varti }} : {{ spele.viesi_varti }}
+                {% if session.get('loma') == 'tiesnesis' %}
+                <td>
+                    <a href="{{ url_for('lab_speli', spele_id=spele.id) }}" 
+                       class="btn btn-sm btn-warning">Labot</a>
+
+                    <a href="{{ url_for('dz_speli', spele_id=spele.id) }}" 
+                       class="btn btn-sm btn-danger">Dzēst</a>
                 </td>
-                <td class="fw-bold">{{ spele.viesi_vards }}</td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>
