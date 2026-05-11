@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = "florbols67"
-fails = "florbols.db"
+fails = "/home/kcace2/florbola-liga/florbols.db"
 
 def get_db(): #izveido savienojumu ar datubāzi
     conn = sqlite3.connect(fails, check_same_thread=False)
@@ -378,4 +378,5 @@ def lab_speli(spele_id):
     return render_template("regiget.html", spele=spele)
  
 if __name__ == '__main__':
+    izveidot_db()
     app.run(debug=True)
