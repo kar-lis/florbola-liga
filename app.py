@@ -7,13 +7,13 @@ app = Flask(__name__)
 app.secret_key = "florbols67"
 fails = "florbols.db"
 
-def get_db():
+def get_db(): #izveido savienojumu ar datubāzi
     conn = sqlite3.connect(fails, check_same_thread=False)
     conn.execute("PRAGMA foreign_keys = ON")
     conn.row_factory = sqlite3.Row
     return conn
 
-def izveidot_db():
+def izveidot_db(): #izveido datubāzi un to aizpilda ar datiem
     conn = get_db()
     c = conn.cursor()
     
@@ -122,7 +122,7 @@ except:
     izveidot_db()
 
 
-@app.route("/")
+@app.route("/")#sākuma lapa, kurā parāda visas pieejamās līgas
 def sakums():
   conn = get_db()
   ligas = conn.execute("SELECT * FROM ligas").fetchall()
@@ -130,7 +130,7 @@ def sakums():
   return render_template("index.html", ligas=ligas)
 
 
-@app.route("/tabula/<int:liga_id>")
+@app.route("/tabula/<int:liga_id>")#līgu tabulas lapa, kurā rāda komandas iegūtos punktus,uzvaras, saudējumus un neizšķirtu spēļu daudzumu.
 def tabula(liga_id):
     conn = get_db()
     liga = conn.execute("SELECT * FROM ligas WHERE id = ?", (liga_id,)).fetchone()
@@ -188,7 +188,7 @@ def tabula(liga_id):
     top_komandas = sorted(stat.values(), key=lambda x: x["punkti"], reverse=True)
     return render_template("ligas.html", liga=liga, komandas=top_komandas)
 
-@app.route("/speles/<int:liga_id>")
+@app.route("/speles/<int:liga_id>")#spēļu saraksta lapa, kurā rāda visas pieejamās līgas spēles
 def speles(liga_id):
     conn = get_db()
     speles_saraksts = conn.execute("""
@@ -204,7 +204,7 @@ def speles(liga_id):
     conn.close()
     return render_template("speles.html", speles=speles_saraksts)
 
-@app.route("/pieteikties", methods=["GET", "POST"])
+@app.route("/pieteikties", methods=["GET", "POST"])#lietotāju pieteikšanās lapa, kur lietotājs vai admins(tiesnesis) var pieteikties savam kontam
 def pieteikties():
     if request.method == "POST":
         lietotajs = request.form.get("lietotajs", "").strip()
@@ -230,7 +230,7 @@ def pieteikties():
     return render_template("pieteikties.html")
 
 
-@app.route("/registreties", methods=["GET", "POST"])
+@app.route("/registreties", methods=["GET", "POST"])#lietotāju reģistrēšanās lapa
 def registreties():
     conn = get_db()
     if request.method == "POST":
@@ -255,13 +255,13 @@ def registreties():
     conn.close()
     return render_template("registreties.html", ligas=ligas)
  
-@app.route("/atslegties")
+@app.route("/atslegties")#lietotāju izrakstīšanās lapa
 def atslegties():
     session.clear()
     flash("Veiksmīgi izrakstījies!", "success")
     return redirect(url_for("sakums"))
 
-@app.route("/piev_speli", methods=["GET", "POST"])
+@app.route("/piev_speli", methods=["GET", "POST"])#admins var pievienot jabkurai izredzētajai līgai spēli, ievadot laukos māju un viesu komandas nosaukumu, kā arī pievienojot rezultātu un spēles datumu
 def piev_speli():
     if session.get("loma") != "tiesnesis":
         flash("Šī lapa ir pieejama tikai tiesnesim!", "error")
@@ -302,7 +302,7 @@ def piev_speli():
         conn.close()
     return render_template("pievienot.html", ligas=ligas, komandas=komandas, izveleta_liga=izveleta_liga)
 
-@app.route("/dz_speli/<int:spele_id>", methods=["GET", "POST"])
+@app.route("/dz_speli/<int:spele_id>", methods=["GET", "POST"])#admins var dzēst jebkuru spēli, no jebkuras līgas, izvēloties spēli no spēļu kalendāra
 def dz_speli(spele_id):
     if session.get("loma") != "tiesnesis":
         flash("Šī lapa ir pieejama tikai tiesnesim!", "error")
@@ -334,7 +334,7 @@ def dz_speli(spele_id):
     conn.close()
     return render_template("dzest.html", spele=spele)
 
-@app.route("/lab_speli/<int:spele_id>", methods=["GET", "POST"])
+@app.route("/lab_speli/<int:spele_id>", methods=["GET", "POST"])#admins var labot jebkuru spēli, no jebkuras līgas, izvēloties spēli no spēļu kalendāra un ievadot jauno rezultātu un/vai datumu
 def lab_speli(spele_id):
     if session.get("loma") != "tiesnesis":
         flash("Šī lapa ir pieejama tikai tiesnesim!", "error")
