@@ -307,8 +307,19 @@ def dz_speli(spele_id):
     if session.get("loma") != "tiesnesis":
         flash("Šī lapa ir pieejama tikai tiesnesim!", "error")
         return redirect(url_for("sakums"))
- 
+
     conn = get_db()
+
+    if request.method == "POST":
+        spele = conn.execute("SELECT liga_id FROM speles WHERE id = ?", (spele_id,)).fetchone()
+        liga_id = spele['liga_id'] if spele else 1
+        conn.execute("DELETE FROM speles WHERE id = ?", (spele_id,))
+        conn.commit()
+        conn.close()
+        flash("Spēle veiksmīgi izdzēsta!", "success")
+        return redirect(url_for("speles", liga_id=liga_id))
+    
+
     spele = conn.execute("""
         SELECT s.id, s.majas_varti, s.viesi_varti, s.datums,
                m.nosaukums AS majas,
@@ -323,15 +334,7 @@ def dz_speli(spele_id):
         conn.close()
         flash("Šāda spēle neeksistē!", "error")
         return redirect(url_for("speles"))
- 
-    if request.method == "POST":
-        conn.execute("DELETE FROM speles WHERE id = ?", (spele_id,))
-        conn.commit()
-        conn.close()
-        flash("Spēle veiksmīgi dzēsta.", "success")
-        return redirect(url_for("speles"))
- 
-    conn.close()
+
     return render_template("dzest.html", spele=spele)
 
 @app.route("/lab_speli/<int:spele_id>", methods=["GET", "POST"])#admins var labot jebkuru spēli, no jebkuras līgas, izvēloties spēli no spēļu kalendāra un ievadot jauno rezultātu un/vai datumu
